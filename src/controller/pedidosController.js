@@ -1,6 +1,7 @@
 import pedidos from '../models/Pedido.js';
 import produtos from '../models/Produto.js';
 import erroSolicitacao from '../middleware/erroSolicitacao.js';
+import estoqueProdutos from '../models/Estoque.js';
 
 class pedidosController {
 
@@ -49,7 +50,7 @@ class pedidosController {
 
     static listagemPedidosPorBusca = async (req, res) => {
         try {
-            const { idUser, user, email, nameUser, idProduct, status, datePedido, total } = req.query
+            const { idUser, user, email, nameUser, idProduct, status, datePedido, total } = req.params
             const busca = {}
 
             if (user) busca.user = user
@@ -88,6 +89,14 @@ class pedidosController {
                 { path: 'idUser' }
             ], {new: true});
             const dadosEnvio = await dados.save()
+            const estoque = await validacaoEstoque(dadosEnvio)
+            if (!estoque) {
+                return res.status(404).send({
+                    sucess: false,
+                    status: 404,
+                    message: "Sem estoque desse produto!",
+                })
+            }
             return res.status(201).send({
                 sucess: true,
                 status: 201,
@@ -115,5 +124,18 @@ class pedidosController {
     } 
 
 }
+
+async function validacaoEstoque(dadosPedido) {
+    const pegaEstoque = await estoqueProdutos.findOne({itens: produtos._id}).populate("idProduct").exec();
+    if (pegaEstoque.quantity === 0 || pegaEstoque.quantity <= 0) {
+        return false;
+    }
+
+    const abateEstoque = pegaEstoque.quantity - dadosPedido.quantityProductFinal
+    pegaEstoque.quantity = abateEstoque
+    await pegaEstoque.save()
+    return true
+}
+
 
 export default pedidosController

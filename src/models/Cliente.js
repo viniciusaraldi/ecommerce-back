@@ -11,7 +11,7 @@ const clienteSchema = new mongoose.Schema({
     adreess: {type: String},
     adreessNumber: {type: Number},
     adreessComplement: {type: String},
-    dateRegister: {type: Date},
+    dateRegister: {type: Date, default: new Date()},
     typeUser: {type: String, required: true, default: "normal"}
 }, {
     versionKey: false

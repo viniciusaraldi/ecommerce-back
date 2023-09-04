@@ -1,7 +1,8 @@
+// Importações Bibliotecas
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
-//
+// Importações Projetos
 import db from './config/db.js';
 import clientes from './routes/clienteRoutes.js'
 import cores from './routes/corRoutes.js'
